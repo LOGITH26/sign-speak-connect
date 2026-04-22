@@ -235,7 +235,7 @@ function TranslatePage() {
         <section className="px-5 mt-6">
           <button
             onClick={captureAndTranslate}
-            disabled={!cameraReady || busy}
+            disabled={!cameraReady || busy || cooldown > 0}
             aria-label="Capture sign and translate"
             className="w-full group flex items-center justify-center gap-3 rounded-2xl bg-gradient-primary text-primary-foreground py-4 shadow-glow transition-spring hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >
@@ -244,7 +244,9 @@ function TranslatePage() {
             ) : (
               <Camera className="h-5 w-5" strokeWidth={2.5} />
             )}
-            <span className="font-bold">{busy ? "Translating…" : "Capture & Translate"}</span>
+            <span className="font-bold">
+              {busy ? "Translating…" : cooldown > 0 ? `Wait ${cooldown}s…` : "Capture & Translate"}
+            </span>
             <Zap className="h-4 w-4 fill-current text-warm" />
           </button>
           <p className="mt-2 text-center text-[11px] text-muted-foreground font-medium">
