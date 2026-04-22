@@ -35,6 +35,15 @@ function TranslatePage() {
   const [language, setLanguage] = useState<"en" | "ms">("en");
   const [result, setResult] = useState<TranslateResult | null>(null);
   const [history, setHistory] = useState<TranslateResult[]>([]);
+  const [cooldown, setCooldown] = useState(0);
+  const lastCallRef = useRef(0);
+
+  // Cooldown ticker
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(id);
+  }, [cooldown]);
 
   // Start camera
   useEffect(() => {
