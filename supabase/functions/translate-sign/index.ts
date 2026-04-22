@@ -107,11 +107,13 @@ If no clear sign is visible, return gloss "" and a friendly prompt sentence aski
     }
 
     if (res.status === 429) {
+      // Return 200 so supabase-js doesn't throw; client handles the soft error.
       return new Response(
         JSON.stringify({
           error: "Too many translations in a short time. Wait a few seconds and try again.",
+          retry: true,
         }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
     if (res.status === 402) {
