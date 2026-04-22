@@ -84,7 +84,8 @@ If no clear sign is visible, return gloss "" and a friendly prompt sentence aski
       tool_choice: { type: "function", function: { name: "return_translation" } },
     };
 
-    const res = await fetch(GATEWAY_URL, {
+    // Retry once with backoff on 429 to smooth over short bursts.
+    let res = await fetch(GATEWAY_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -94,8 +95,22 @@ If no clear sign is visible, return gloss "" and a friendly prompt sentence aski
     });
 
     if (res.status === 429) {
+      await new Promise((r) => setTimeout(r, 1500));
+      res = await fetch(GATEWAY_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+    }
+
+    if (res.status === 429) {
       return new Response(
-        JSON.stringify({ error: "Rate limit reached. Please slow down and try again in a moment." }),
+        JSON.stringify({
+          error: "Too many translations in a short time. Wait a few seconds and try again.",
+        }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }

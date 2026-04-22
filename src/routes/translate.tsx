@@ -35,6 +35,15 @@ function TranslatePage() {
   const [language, setLanguage] = useState<"en" | "ms">("en");
   const [result, setResult] = useState<TranslateResult | null>(null);
   const [history, setHistory] = useState<TranslateResult[]>([]);
+  const [cooldown, setCooldown] = useState(0);
+  const lastCallRef = useRef(0);
+
+  // Cooldown ticker
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(id);
+  }, [cooldown]);
 
   // Start camera
   useEffect(() => {
@@ -87,6 +96,15 @@ function TranslatePage() {
 
   const captureAndTranslate = useCallback(async () => {
     if (!videoRef.current || !cameraReady || busy) return;
+    // Enforce a 4s minimum gap between calls to avoid Lovable AI rate limits.
+    const now = Date.now();
+    const sinceLast = now - lastCallRef.current;
+    const MIN_GAP = 4000;
+    if (sinceLast < MIN_GAP) {
+      setCooldown(Math.ceil((MIN_GAP - sinceLast) / 1000));
+      return;
+    }
+    lastCallRef.current = now;
     setBusy(true);
     setError(null);
     try {
@@ -114,6 +132,8 @@ function TranslatePage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong.";
       setError(msg);
+      // If the gateway still rate-limited us, force a longer cooldown.
+      if (/rate limit|too many/i.test(msg)) setCooldown(8);
     } finally {
       setBusy(false);
     }
@@ -215,7 +235,7 @@ function TranslatePage() {
         <section className="px-5 mt-6">
           <button
             onClick={captureAndTranslate}
-            disabled={!cameraReady || busy}
+            disabled={!cameraReady || busy || cooldown > 0}
             aria-label="Capture sign and translate"
             className="w-full group flex items-center justify-center gap-3 rounded-2xl bg-gradient-primary text-primary-foreground py-4 shadow-glow transition-spring hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >
@@ -224,7 +244,9 @@ function TranslatePage() {
             ) : (
               <Camera className="h-5 w-5" strokeWidth={2.5} />
             )}
-            <span className="font-bold">{busy ? "Translating…" : "Capture & Translate"}</span>
+            <span className="font-bold">
+              {busy ? "Translating…" : cooldown > 0 ? `Wait ${cooldown}s…` : "Capture & Translate"}
+            </span>
             <Zap className="h-4 w-4 fill-current text-warm" />
           </button>
           <p className="mt-2 text-center text-[11px] text-muted-foreground font-medium">
