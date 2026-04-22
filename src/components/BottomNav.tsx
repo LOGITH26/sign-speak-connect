@@ -1,4 +1,5 @@
 import { Home, History, Sparkles, User, Camera } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const items = [
   { icon: Home, label: "Home", active: true },
@@ -20,12 +21,13 @@ export function BottomNav() {
               <NavItem key={it.label} {...it} />
             ))}
             <div className="flex justify-center">
-              <button
+              <Link
+                to="/translate"
                 aria-label="Open camera translator"
                 className="-mt-8 h-16 w-16 rounded-2xl bg-gradient-primary shadow-glow flex items-center justify-center text-primary-foreground transition-spring hover:scale-110 hover:rotate-3 active:scale-95"
               >
                 <Camera className="h-6 w-6" strokeWidth={2.5} />
-              </button>
+              </Link>
             </div>
             {items.slice(2).map((it) => (
               <NavItem key={it.label} {...it} />

@@ -1,4 +1,5 @@
 import { Mic, Volume2, Languages, BookOpen } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const actions = [
   {
@@ -7,6 +8,7 @@ const actions = [
     sub: "Speech → Text",
     bg: "bg-primary/10",
     fg: "text-primary",
+    to: "/listen" as const,
   },
   {
     icon: Volume2,
@@ -15,6 +17,7 @@ const actions = [
     bg: "bg-accent/15",
     fg: "text-accent-foreground",
     iconColor: "text-accent",
+    to: "/translate" as const,
   },
   {
     icon: Languages,
@@ -23,6 +26,7 @@ const actions = [
     bg: "bg-warm/20",
     fg: "text-warm-foreground",
     iconColor: "text-[oklch(0.55_0.15_60)]",
+    to: "/translate" as const,
   },
   {
     icon: BookOpen,
@@ -30,6 +34,7 @@ const actions = [
     sub: "BIM Lessons",
     bg: "bg-success/15",
     fg: "text-success",
+    to: "/" as const,
   },
 ] as const;
 
@@ -44,8 +49,9 @@ export function QuickActions() {
         {actions.map((a) => {
           const Icon = a.icon;
           return (
-            <button
+            <Link
               key={a.label}
+              to={a.to}
               aria-label={`${a.label} — ${a.sub}`}
               className="group flex flex-col items-center gap-2 rounded-2xl bg-card p-3 shadow-card transition-spring hover:-translate-y-1 hover:shadow-soft"
             >
@@ -58,7 +64,7 @@ export function QuickActions() {
                 />
               </span>
               <span className="text-[11px] font-bold text-foreground leading-tight">{a.label}</span>
-            </button>
+            </Link>
           );
         })}
       </div>

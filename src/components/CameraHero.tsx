@@ -1,4 +1,5 @@
 import { Camera, Sparkles, Zap } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-signing.jpg";
 
 export function CameraHero() {
@@ -36,16 +37,17 @@ export function CameraHero() {
             Real-time BIM translation powered by on-device AI.
           </p>
 
-          <button
+          <Link
+            to="/translate"
             aria-label="Start translating now"
-            className="mt-6 group flex items-center gap-3 rounded-2xl bg-white pl-2 pr-5 py-2 shadow-glow transition-spring hover:scale-[1.02] active:scale-[0.98]"
+            className="mt-6 group inline-flex items-center gap-3 rounded-2xl bg-white pl-2 pr-5 py-2 shadow-glow transition-spring hover:scale-[1.02] active:scale-[0.98]"
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground shadow-soft">
               <Camera className="h-5 w-5" strokeWidth={2.5} />
             </span>
             <span className="font-bold text-foreground">Start Translating</span>
             <Zap className="h-4 w-4 text-accent fill-accent" />
-          </button>
+          </Link>
         </div>
       </div>
     </section>
