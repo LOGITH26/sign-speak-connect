@@ -1,8 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Camera, Loader2, Sparkles, Volume2, Languages, Zap } from "lucide-react";
-import { translateSignFrame, type TranslateResult } from "@/server/translate.functions";
+import { supabase } from "@/integrations/supabase/client";
+
+type TranslateResult = {
+  gloss: string;
+  sentence: string;
+  confidence: "low" | "medium" | "high";
+  language: "en" | "ms";
+};
 
 export const Route = createFileRoute("/translate")({
   head: () => ({
@@ -29,7 +35,6 @@ function TranslatePage() {
   const [language, setLanguage] = useState<"en" | "ms">("en");
   const [result, setResult] = useState<TranslateResult | null>(null);
   const [history, setHistory] = useState<TranslateResult[]>([]);
-  const translateFn = useServerFn(translateSignFrame);
 
   // Start camera
   useEffect(() => {
@@ -97,7 +102,12 @@ function TranslatePage() {
       ctx.drawImage(video, 0, 0, w, h);
       const imageDataUrl = canvas.toDataURL("image/jpeg", 0.78);
 
-      const r = await translateFn({ data: { imageDataUrl, targetLanguage: language } });
+      const { data, error: fnError } = await supabase.functions.invoke("translate-sign", {
+        body: { imageDataUrl, targetLanguage: language },
+      });
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+      const r = data as TranslateResult;
       setResult(r);
       setHistory((prev) => [r, ...prev].slice(0, 6));
       if (r.sentence) speak(r.sentence, r.language);
@@ -107,7 +117,7 @@ function TranslatePage() {
     } finally {
       setBusy(false);
     }
-  }, [busy, cameraReady, language, speak, translateFn]);
+  }, [busy, cameraReady, language, speak]);
 
   return (
     <div className="min-h-screen bg-background">
