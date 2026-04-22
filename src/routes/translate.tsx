@@ -96,6 +96,15 @@ function TranslatePage() {
 
   const captureAndTranslate = useCallback(async () => {
     if (!videoRef.current || !cameraReady || busy) return;
+    // Enforce a 4s minimum gap between calls to avoid Lovable AI rate limits.
+    const now = Date.now();
+    const sinceLast = now - lastCallRef.current;
+    const MIN_GAP = 4000;
+    if (sinceLast < MIN_GAP) {
+      setCooldown(Math.ceil((MIN_GAP - sinceLast) / 1000));
+      return;
+    }
+    lastCallRef.current = now;
     setBusy(true);
     setError(null);
     try {
@@ -123,6 +132,8 @@ function TranslatePage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong.";
       setError(msg);
+      // If the gateway still rate-limited us, force a longer cooldown.
+      if (/rate limit|too many/i.test(msg)) setCooldown(8);
     } finally {
       setBusy(false);
     }
