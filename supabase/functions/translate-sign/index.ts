@@ -119,7 +119,7 @@ If no clear sign is visible, return gloss "" and a friendly prompt sentence aski
     if (res.status === 402) {
       return new Response(
         JSON.stringify({ error: "AI credits exhausted. Add funds in Settings → Workspace → Usage." }),
-        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
     if (!res.ok) {
