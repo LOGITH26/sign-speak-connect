@@ -99,7 +99,7 @@ function TranslatePage() {
     // Enforce a 4s minimum gap between calls to avoid Lovable AI rate limits.
     const now = Date.now();
     const sinceLast = now - lastCallRef.current;
-    const MIN_GAP = 4000;
+    const MIN_GAP = 6000;
     if (sinceLast < MIN_GAP) {
       setCooldown(Math.ceil((MIN_GAP - sinceLast) / 1000));
       return;
